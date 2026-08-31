@@ -1,0 +1,31 @@
+id;name;rarity;defense;speed;attack;slot
+1;Rusty Sword;common;0;0.04;8;right_hand
+2;Wooden Shield;common;6;0.00;0;left_hand
+3;Short Bow;common;0;0.06;7;right_hand
+4;Quiver of Arrows;common;0;0.02;3;left_hand
+5;Iron Dagger;common;0;0.08;6;right_hand
+6;Iron Dagger Offhand;common;0;0.08;6;left_hand
+7;Battle Axe;common;0;0.02;10;right_hand
+8;Wooden Buckler;common;4;0.00;0;left_hand
+9;Simple Mace;common;0;0.02;9;right_hand
+10;Old Tome;common;0;0.00;5;left_hand
+11;Hunting Spear;common;0;0.04;9;right_hand
+12;Torch;common;0;0.02;4;left_hand
+13;Rusty Hatchet;common;0;0.04;7;right_hand
+14;Cracked Lantern;common;0;0.00;2;left_hand
+15;Training Sword;common;0;0.04;6;right_hand
+16;Steel Longsword;rare;0;0.06;14;right_hand
+17;Reinforced Shield;rare;10;0.00;0;left_hand
+18;Elven Bow;rare;0;0.08;13;right_hand
+19;Silver Arrows;rare;0;0.04;6;left_hand
+20;Twin Fang Daggers;rare;0;0.10;12;right_hand
+21;War Hammer;rare;0;0.02;16;right_hand
+22;Runed Tome;rare;0;0.02;9;left_hand
+23;Flameforged Blade;epic;0;0.08;22;right_hand
+24;Aegis of the Guardian;epic;16;0.00;0;left_hand
+25;Windrunner Bow;epic;0;0.12;20;right_hand
+26;Phoenix Feather Arrows;epic;0;0.06;10;left_hand
+27;Voidsteel Axe;epic;0;0.06;24;right_hand
+28;Godslayer Greatsword;legendary;0;0.10;35;right_hand
+29;Excalibur;legendary;0;0.12;38;right_hand
+30;Bulwark of Eternity;legendary;22;0.00;0;left_hand
