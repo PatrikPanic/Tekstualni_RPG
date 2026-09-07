@@ -4,13 +4,17 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include "item.h"
+#include "Item.h"
 
 
 namespace oop::projekt
 {
 	template <typename T>
 
+	// Inventory - genericki spremnik predmeta s unaprijed zadanim brojem mjesta.
+	// Predmeti se cuvaju kao unique_ptr, pa spremnik preuzima vlasnistvo nad
+	// njima i sam ih oslobada. Zbog toga se spremnik ne moze kopirati, samo
+	// premjestati.
 	class Inventory
 	{
 	protected:
@@ -18,7 +22,7 @@ namespace oop::projekt
 	public:
 		Inventory(int size) { slots.resize(size); }
 
-		//funkcija za dodavanje itema u invenotry na prvo slobodno mjesto
+		// Dodaje predmet na prvo slobodno mjesto. Vraca false ako je spremnik pun.
 		virtual bool addItem(std::unique_ptr <T> addingitem)
 		{
 			for (int i = 0; i < slots.size(); i++)
@@ -29,10 +33,10 @@ namespace oop::projekt
 					return true;
 				}
 			}
-			std::cout << "invenotry je pun" << std::endl;
+			// spremnik je pun; ispis je posao sucelja, pa se ovdje samo javlja neuspjeh
 			return false;
 		}
-		//funkcija za micanje itema sa pozicije
+		// Vadi predmet sa zadane pozicije i prepusta vlasnistvo pozivatelju.
 		virtual std::unique_ptr <T> removeItem(int position)
 		{
 			if (position >= slots.size())
@@ -47,6 +51,8 @@ namespace oop::projekt
 			}
 		}
 
+		// Vraca nazive predmeta za ispis u izborniku. Izvedene klase ovo
+		// nadjacavaju kako bi prazna mjesta prikazale kao slobodne slotove.
 		virtual std::vector<std::string> getItemNames() const
 		{
 			std::vector<std::string> inventoryitemnames;
@@ -58,17 +64,30 @@ namespace oop::projekt
 			return inventoryitemnames;
 		}
 
-		std::string getItemNames_string() const
+		// Poravnava tekst na zadanu sirinu kako bi se ispis slozio u stupce.
+		static std::string padRight(std::string text, int width)
+		{
+			while (static_cast<int>(text.size()) < width)
+				text += " ";
+			return text;
+		}
+
+		virtual std::string getItemNames_string() const
 		{
 			std::string inventoryitemnames;
-			for (int i = 0; i < slots.size(); i++)
+			int number = 1;
+			for (int i = 0; i < static_cast<int>(slots.size()); i++)
 			{
 				if (slots[i])
 				{
+					inventoryitemnames += "    " + padRight(std::to_string(number) + ".", 5);
 					inventoryitemnames += slots[i]->getName();
-					inventoryitemnames += ",";
+					inventoryitemnames += "\n";
+					number += 1;
 				}
 			}
+			if (inventoryitemnames.empty())
+				inventoryitemnames = "    (empty)\n";
 			return inventoryitemnames;
 		}
 
@@ -82,13 +101,24 @@ namespace oop::projekt
 			return true;
 		}
 
-		Item* item_from_invenotry(int position) const { return slots[position].get(); }
+		Item* item_from_inventory(int position) const
+		{
+			if (position < 0 || position >= static_cast<int>(slots.size()))
+				return nullptr;
+			return slots[position].get();
+		}
 
 		virtual int inventory_size() const { return static_cast<int>(slots.size()); }
+		// Ukupan broj mjesta, bez obzira na to koliko ih je popunjeno.
+		int capacity() const { return static_cast<int>(slots.size()); }
 
 
 	};
 
+	// Backpack_Inventory - ruksak igraca i protivnika. Za razliku od spremnika
+	// oklopa i oruzja, mjesta nisu vezana uz odredenu vrstu predmeta, pa se
+	// nakon vadenja predmeta praznine sabijaju kako bi popis u izborniku
+	// odgovarao stvarnim mjestima.
 	class Backpack_Inventory : public Inventory<Item>
 	{
 	public:
@@ -98,6 +128,9 @@ namespace oop::projekt
 		int inventory_size() const override;
 	};
 
+	// Armor_Inventory - opremljeni oklop. Ima tocno pet mjesta, po jedno za
+	// svaki ArmorSlot, pa je mjesto predmeta odredeno njegovim slotom, a ne
+	// redoslijedom dodavanja.
 	class Armor_Inventory :public Inventory<Armor>
 	{
 	public:
@@ -107,8 +140,10 @@ namespace oop::projekt
 		float total_armor_defense() const;
 		float total_armor_speed() const;
 		std::vector<std::string> getItemNames() const override;
+		std::string getItemNames_string() const override;
 	};
 
+	// Weapon_Inventory - opremljeno oruzje. Dva mjesta, lijeva i desna ruka.
 	class Weapon_Inventory : public Inventory<Weapon>
 	{
 	public:
@@ -119,5 +154,6 @@ namespace oop::projekt
 		float total_weapon_speed() const;
 		float total_weapon_attack() const;
 		std::vector<std::string> getItemNames() const override;
+		std::string getItemNames_string() const override;
 	};
 }

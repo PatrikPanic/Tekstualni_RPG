@@ -1,55 +1,98 @@
-﻿#include "Enemyfactory.h"
+﻿#include "EnemyFactory.h"
 
 namespace oop::projekt
 {
-	Enemy Enemyfactory::EnemyFactory(Location* location)
+	// Vraca nasumicno ime iz zadanog popisa. Ako je popis prazan (npr. datoteka
+	// s imenima nije pronadena), vraca zamjensko ime umjesto dijeljenja s nulom.
+	std::string EnemyFactory::pickRandomName(const std::map<int, std::string>& names) const
 	{
-		int lvl = 1 + Location::toInt(location->getlocationdifficulty()) * 3 + (rand() % 3);
-		int max_hp = 40 + lvl * 8;
-		float base_attack = 6 + lvl * 1.5;
-		float base_defense = 2 + lvl * 0.8;
-		float base_speed = 0.7 + lvl * 0.03;
+		if (names.empty())
+			return "Unknown Enemy";
+		int random = rand() % static_cast<int>(names.size());
+		return names.at(random);
+	}
+
+	// Stvara obicnog protivnika. Razina raste s tezinom lokacije, a iz nje se
+	// izvode ostale statistike, pa su protivnici na teskim lokacijama opasniji
+	// ali i vrjedniji.
+	Enemy EnemyFactory::createEnemy(Location* location)
+	{
+		int lvl = 1 + Location::toInt(location->getlocationdifficulty()) * 4 + (rand() % 4);
+		int max_hp = 50 + lvl * 14;
+		float base_attack = 14 + lvl * 4.0;
+		float base_defense = 3 + lvl * 1.4;
+		float base_speed = 0.75 + lvl * 0.02;
 		std::string name;
-		int random;
 		switch (location->getLocationType())
 		{
 		case(Location::LocationType::City):
 		{
-			random = rand() % static_cast<int>(city.size());
-			name = city[random];
+			name = pickRandomName(city);
 			break;
 		}
 		case(Location::LocationType::Forest):
 		{
-			random = rand() % static_cast<int>(forest.size());
-			name = forest[random];
+			name = pickRandomName(forest);
 			break;
 		}
 		case(Location::LocationType::Road):
 		{
-			random = rand() % static_cast<int>(road.size());
-			name = road[random];
+			name = pickRandomName(road);
 			break;
 		}
 		case(Location::LocationType::Cave):
 		{
-			random = rand() % static_cast<int>(cave.size());
-			name = cave[random];
+			name = pickRandomName(cave);
 			break;
 		}
 		default:
 		{
-			random = rand() % static_cast<int>(city.size());
-			name = city[random];
+			name = pickRandomName(city);
 			break;
 		}
 		}
 		Enemy enemy(name, lvl, max_hp, base_attack, base_defense, base_speed, 5);
-		fillenemybackpack(enemy);
+		fillEnemyBackpack(enemy);
 		return enemy;
 	}
 
-	void Enemyfactory::fillenemybackpack(Enemy& enemy)
+	// Zavrsni protivnik u Ashenvaleu. Statistike su fiksne jer je to jedini
+	// protivnik koji zavrsava igru, pa ne smije ovisiti o nasumicnosti.
+	Enemy EnemyFactory::createBoss()
+	{
+		int lvl = 18;
+		int max_hp = 400;
+		float base_attack = 76;
+		float base_defense = 22;
+		float base_speed = 1.0;
+		Enemy boss("Voidspire Overlord", lvl, max_hp, base_attack, base_defense, base_speed, 5);
+		fillEnemyBackpack(boss);
+		return boss;
+	}
+
+	// Srednji boss cuva prolaz prema Voidspireu. Jaci je od obicnih protivnika
+	// na istoj lokaciji, ali slabiji od zavrsnog bossa.
+	Enemy EnemyFactory::createMidBoss(Location* location)
+	{
+		int lvl = 12;
+		int max_hp = 200;
+		float base_attack = 52;
+		float base_defense = 14;
+		float base_speed = 0.9;
+		std::string name = "Midboss";
+		if (location->getLocationName() == "Mirkwood")
+			name = "Mirkwood Warden";
+		else if (location->getLocationName() == "Thornwood")
+			name = "Thornwood Butcher";
+
+		Enemy midboss(name, lvl, max_hp, base_attack, base_defense, base_speed, 5);
+		fillEnemyBackpack(midboss);
+		return midboss;
+	}
+
+	// Puni ruksak protivnika opremom koju igrac moze uzeti nakon pobjede.
+	// Rijetkost predmeta ovisi o razini protivnika.
+	void EnemyFactory::fillEnemyBackpack(Enemy& enemy)
 	{
 		int num_items = 1 + (enemy.getLVL() / 4);
 		if (num_items > 5)
@@ -61,11 +104,11 @@ namespace oop::projekt
 		float epic_weight = enemy.getLVL() * 4;
 		float legendery_weight = std::max(enemy.getLVL() * 2 - 10, 0);
 		float total = common_weight + rear_weight + epic_weight + legendery_weight;
-		int roll_rearity,roll_store;
+		int roll_rarity,roll_store;
 		for (int i = 0; i < num_items; i++)
 		{
-			roll_rearity = rand() % static_cast<int>(total);
-			if (roll_rearity < common_weight)
+			roll_rarity = rand() % static_cast<int>(total);
+			if (roll_rarity < common_weight)
 			{
 				roll_store = rand() % 3;
 				std::unique_ptr <Item> item;
@@ -101,8 +144,8 @@ namespace oop::projekt
 				}
 			}
 			else {
-				roll_rearity -= common_weight;
-				if (roll_rearity < rear_weight)
+				roll_rarity -= common_weight;
+				if (roll_rarity < rear_weight)
 				{
 					roll_store = rand() % 2;
 					std::unique_ptr <Item> item;
@@ -110,7 +153,7 @@ namespace oop::projekt
 					{
 					case(0):
 					{
-						item = pickRandomItem<Armor>(Rarity::Rear);
+						item = pickRandomItem<Armor>(Rarity::Rare);
 						if (item)
 						{
 							enemy.get_backpack_inventory().addItem(std::move(item));
@@ -119,7 +162,7 @@ namespace oop::projekt
 					}
 					case(1):
 					{
-						item = pickRandomItem<Weapon>(Rarity::Rear);
+						item = pickRandomItem<Weapon>(Rarity::Rare);
 						if (item)
 						{
 							enemy.get_backpack_inventory().addItem(std::move(item));
@@ -129,8 +172,8 @@ namespace oop::projekt
 					}
 				}
 				else {
-					roll_rearity -= rear_weight;
-					if (roll_rearity < epic_weight)
+					roll_rarity -= rear_weight;
+					if (roll_rarity < epic_weight)
 					{
 						roll_store = rand() % 2;
 						std::unique_ptr <Item> item;
@@ -164,7 +207,7 @@ namespace oop::projekt
 						{
 						case(0):
 						{
-							item = pickRandomItem<Armor>(Rarity::Legendery);
+							item = pickRandomItem<Armor>(Rarity::Legendary);
 							if (item)
 							{
 								enemy.get_backpack_inventory().addItem(std::move(item));
@@ -173,7 +216,7 @@ namespace oop::projekt
 						}
 						case(1):
 						{
-							item = pickRandomItem<Weapon>(Rarity::Legendery);
+							item = pickRandomItem<Weapon>(Rarity::Legendary);
 							if (item)
 							{
 								enemy.get_backpack_inventory().addItem(std::move(item));
@@ -188,10 +231,11 @@ namespace oop::projekt
 		
 	}
 
-	void Enemyfactory::loadFromFile()
+	void EnemyFactory::loadFromFile()
 	{
 		std::fstream file("Enemy", std::ios::in);
-		if (file.is_open())
+		if (!file.is_open())
+			throw FileNotFoundException("Enemy");
 		{
 			std::string line;
 			int cityid = 0,forestid = 0,caveid = 0,roadid = 0;

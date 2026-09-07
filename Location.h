@@ -6,6 +6,9 @@
 namespace oop::projekt
 {
 
+	// Location - jedno mjesto na mapi. Tip odreduje koji se protivnici na njemu
+	// pojavljuju, a tezina koliko su jaki, koliko je vjerojatan susret i koliko
+	// bodova nosi pobjeda.
 	class Location
 	{
 	public:

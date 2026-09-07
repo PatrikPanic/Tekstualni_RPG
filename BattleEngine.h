@@ -6,6 +6,10 @@
 
 namespace oop::projekt
 {
+	// Battle - vodi jednu borbu izmedu igraca i protivnika. Redoslijed poteza
+	// odreduje se sustavom brojaca ("turn meter"): svakom otkucaju oba
+	// sudionika dodaje se njihova brzina, a potez dobiva onaj ciji brojac prvi
+	// prijede prag. Brzi lik zato moze odigrati vise poteza zaredom.
 	class Battle
 	{
 	private:
@@ -25,9 +29,9 @@ namespace oop::projekt
 		Battle(Player_Character* player, Enemy* enemy) { player_turnmetar = 0, enemy_turnmetar = 0,
 			this->player = player, this->enemy = enemy; }
 		TurnOwner processTick();
-		float preformAttack(TurnOwner vlasnik);
-		void preformDefense();
-		bool preformEscape();
+		float performAttack(TurnOwner vlasnik);
+		void performDefense();
+		bool performEscape();
 		bool isBattleOver();
 	};
 }

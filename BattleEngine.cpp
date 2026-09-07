@@ -6,6 +6,9 @@
 
 namespace oop::projekt
 {
+	// Pomice brojace dok jedan od njih ne prijede prag i vraca vlasnika poteza.
+	// Brojac se pritom umanjuje za prag, a ne postavlja na nulu, kako se visak
+	// ne bi gubio i kako bi razlika u brzini ostala vidljiva kroz vise poteza.
 	Battle::TurnOwner Battle::processTick()
 	{
 		while (true)
@@ -28,7 +31,7 @@ namespace oop::projekt
 		}
 	}
 
-	float Battle::preformAttack(TurnOwner vlasnik)
+	float Battle::performAttack(TurnOwner vlasnik)
 	{
 		float dmg;
 		float result;
@@ -59,12 +62,12 @@ namespace oop::projekt
 		}
 	}
 
-	void Battle::preformDefense()
+	void Battle::performDefense()
 	{
 		player_defending = true;
 	}
 
-	bool Battle::preformEscape()
+	bool Battle::performEscape()
 	{
 		return std::rand() % 2 == 0;
 	}

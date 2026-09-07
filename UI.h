@@ -6,32 +6,46 @@
 #include "Map.h"
 #include "Player_Character.h"
 #include "Location.h"
-#include "Enemyfactory.h"
+#include "EnemyFactory.h"
+#include "Score.h"
 
 namespace oop::projekt
 {
+	// UI - sve sto se ispisuje na ekran i sav unos s tipkovnice. Odvojen je od
+	// ostatka igre, pa logika borbe, inventara i mape ne ovisi o konzoli i moze
+	// se testirati bez nje.
 	class UI
 	{
 	private:
+		// Prikazuje izbornik i vraca redni broj odabrane stavke. Kretanje je
+		// strelicama, potvrda tipkom Enter, a popis je kruzan.
 		int showOptions(std::vector<std::string> options, std::string header = "", std::string header2 = "");
 	public:
 
 		enum class Item_choice
 		{
 			Drop,
-			Equipe,
-			Unequipe,
+			Equip,
+			Unequip,
 			See_stats,
 			Back
 		};
 		void showMessage(std::string message);
 		int showMainMenu();
-		int gameMenu(Map& map);
-		template <typename T> int showInventory(T& invenotry)
+		std::string askPlayerName();
+		void showIntro(std::string player_name);
+		void showHighscore(Highscore& highscore);
+		void showGameOver(bool won, int raw_score, int days, int final_score);
+		int gameMenu(Map& map, Player_Character& player, Score& score, bool can_rest);
+		template <typename T> int showInventory(T& inventory)
 		{
-			return showOptions(invenotry.getItemNames());
+			return showOptions(inventory.getItemNames());
 		}
 		int showBattleMenu(Player_Character& player, Enemy& enemy);
+		int lootMenu(Player_Character& player, Enemy& enemy);
+		int lootItemChoice(Item& item);
+		int lootBackpackMenu(Player_Character& player, Enemy& enemy);
+		int lootDropChoice(Item& item);
 		void showAttackResult(float dmg, Battle::TurnOwner attacker);
 		void showDefendResult();
 		void showRunResult(bool success);

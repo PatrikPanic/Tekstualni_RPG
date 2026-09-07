@@ -139,6 +139,7 @@
     <ClCompile Include="Inventory.cpp" />
     <ClCompile Include="BattleEngine.cpp" />
     <ClCompile Include="UI.cpp" />
+    <ClCompile Include="Score.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Enemyfactory.h" />
@@ -151,6 +152,8 @@
     <ClInclude Include="Map.h" />
     <ClInclude Include="Player_Character.h" />
     <ClInclude Include="UI.h" />
+    <ClInclude Include="Score.h" />
+    <ClInclude Include="Exception.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="armor.txt" />

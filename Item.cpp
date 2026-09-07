@@ -119,7 +119,7 @@ namespace oop::projekt
             "weapon attack: " + std::to_string(weapon_attack) + "\n" +
             "weapon defense: " + std::to_string(weapon_defense) + "\n" +
             "weapon speed: " + std::to_string(weapon_speed) + "\n" +
-            "hand: " + toString(LR_hand) + "\n"
+            "hand: " + toString(weapon_slot) + "\n"
             "item rarity: " + toString(rarity) + "\n";
     }
 

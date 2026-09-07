@@ -4,26 +4,28 @@ namespace oop::projekt
 {
 	void Backpack_Inventory::compact()
 	{
-		if (slots.empty()) 
+		if (slots.empty())
 			return;
 
-		for (int i = 0; i < static_cast<int>(slots.size()) - 1; i++)
+		// Predmete pomicemo prema pocetku i cuvamo njihov redoslijed,
+		// tako da se popis u izborniku ne premijesa nakon vadenja predmeta.
+		int insert_position = 0;
+		for (int i = 0; i < static_cast<int>(slots.size()); i++)
 		{
-			if (!slots[i])
+			if (slots[i])
 			{
-				for (int j = static_cast<int>(slots.size()) - 1; j != i; j--)
+				if (i != insert_position)
 				{
-					if (slots[j])
-					{
-						slots[i] = std::move(slots[j]);
-						slots[j] = nullptr;
-						break;
-					}
+					slots[insert_position] = std::move(slots[i]);
+					slots[i] = nullptr;
 				}
+				insert_position += 1;
 			}
 		}
 	}
 
+	// Vadi predmet sa zadanog mjesta i vraca vlasnistvo nad njim pozivatelju.
+	// Vraca nullptr ako je mjesto prazno ili izvan granica.
 	std::unique_ptr <Item> Backpack_Inventory::removeItem(int position)
 	{
 		if (position >= slots.size())
@@ -51,7 +53,10 @@ namespace oop::projekt
 		return size;
 	}
 
-	//funkcije of Armor invenotrija
+	// Funkcije spremnika oklopa
+	// Oklop se uvijek sprema na mjesto koje odgovara njegovom slotu. Ako je to
+	// mjesto vec zauzeto, stari se predmet gubi, pa ga pozivatelj mora prije
+	// skinuti preko unequip_armor.
 	bool Armor_Inventory::addItem(std::unique_ptr <Armor> addingitem)
 	{
 		switch(addingitem->getArmorSlot())
@@ -76,7 +81,10 @@ namespace oop::projekt
 		}
 	}
 
-	//dinamic cast iz itema u amror unique_pointer
+	// Provjera vrste ide preko dynamic_cast, jer se tek u trenutku pretvorbe
+	// zna je li opci predmet doista oklop.
+	// Pretvara opci predmet u oklop. Vraca nullptr ako predmet nije oklop,
+	// pri cemu se predmet gubi, pa se vrsta mora provjeriti prije poziva.
 	std::unique_ptr <Armor> Armor_Inventory::transferToArmor(std::unique_ptr <Item> item)
 	{
 		Armor* rawptr = dynamic_cast<Armor*>(item.get());
@@ -101,6 +109,8 @@ namespace oop::projekt
 		}
 		return total_armor;
 	}
+	// Bonus brzine je prosjek opremljenih dijelova, a ne zbroj, kako pet
+	// komada oklopa ne bi neuobicajeno ubrzalo igraca.
 	float Armor_Inventory::total_armor_speed() const
 	{
 		float total_speed = 0;
@@ -133,7 +143,21 @@ namespace oop::projekt
 		return inventoryitemnames;
 	}
 
-	//funckije od Weapon invenotrija
+	std::string Armor_Inventory::getItemNames_string() const
+	{
+		std::string inventoryitemnames;
+		for (int i = 0; i < static_cast<int>(slots.size()); i++)
+		{
+			std::string slot_name = toString(static_cast<ArmorSlot>(i));
+			std::string item_name = "-";
+			if (slots[i])
+				item_name = slots[i]->getName();
+			inventoryitemnames += "    " + padRight(slot_name, 10) + " : " + item_name + "\n";
+		}
+		return inventoryitemnames;
+	}
+
+	// Funkcije spremnika oruzja
 	bool Weapon_Inventory::addItem(std::unique_ptr <Weapon> addingitem)
 	{
 		switch (addingitem->getWeaponSlot())
@@ -216,6 +240,20 @@ namespace oop::projekt
 			{
 				inventoryitemnames.push_back("empty slot " + toString(static_cast<WeaponSlot>(i)));
 			}
+		}
+		return inventoryitemnames;
+	}
+
+	std::string Weapon_Inventory::getItemNames_string() const
+	{
+		std::string inventoryitemnames;
+		for (int i = 0; i < static_cast<int>(slots.size()); i++)
+		{
+			std::string slot_name = toString(static_cast<WeaponSlot>(i));
+			std::string item_name = "-";
+			if (slots[i])
+				item_name = slots[i]->getName();
+			inventoryitemnames += "    " + padRight(slot_name, 10) + " : " + item_name + "\n";
 		}
 		return inventoryitemnames;
 	}

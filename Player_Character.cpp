@@ -4,11 +4,10 @@
 
 namespace oop::projekt
 {
-	Entity::Entity(std::string name,int LVL, float max_hp, float base_attack,
-		float base_defense, float base_speed, int size) : e_invenotry(size)
+	Entity::Entity(std::string name, float max_hp, float base_attack,
+		float base_defense, float base_speed, int size) : e_inventory(size)
 	{
 		this->name = name;
-		this->LVL = LVL;
 		this->max_hp = max_hp;
 		hp = max_hp;
 		this->base_attack = base_attack;
@@ -26,14 +25,17 @@ namespace oop::projekt
 		return 0;
 	}
 
-	Player_Character::Player_Character(std::string name,int LVL, float max_hp, float base_attack,
-		float base_defense, float base_speed,int size) : Entity(name,LVL, max_hp, base_attack, base_defense, base_speed,size)
+	Player_Character::Player_Character(std::string name, float max_hp, float base_attack,
+		float base_defense, float base_speed,int size) : Entity(name, max_hp, base_attack, base_defense, base_speed,size)
 	{
-		recalcute_stats();
+		recalculate_stats();
 	}
 
 
-	void Player_Character::recalcute_stats() 
+	// Ponovno racuna ukupne statistike iz osnovnih vrijednosti i bonusa
+	// opremljenih predmeta. Mora se pozvati nakon svakog opremanja i skidanja,
+	// inace bi lik zadrzao stare vrijednosti.
+	void Player_Character::recalculate_stats() 
 	{
 		total_defense = base_defense + c_armor.total_armor_defense() + c_weapon.total_weapon_defense();
 		total_speed = base_speed + c_armor.total_armor_speed() + c_weapon.total_weapon_speed();
@@ -52,29 +54,32 @@ namespace oop::projekt
 
 	bool Player_Character::unequip_armor(int slot_position)
 	{
-		if (e_invenotry.isFull())
+		if (e_inventory.isFull())
 			return false;
 		std::unique_ptr<Armor> old = c_armor.removeItem(slot_position);
 		if (old)
-			e_invenotry.addItem(std::unique_ptr<Item>(old.release())); // natrag u backpack
-		recalcute_stats();
+			e_inventory.addItem(std::unique_ptr<Item>(old.release())); // natrag u backpack
+		recalculate_stats();
 		return true;
 	}
 
 	bool Player_Character::unequip_weapon(int slot_position)
 	{
-		if (e_invenotry.isFull())
+		if (e_inventory.isFull())
 			return false;
 		std::unique_ptr<Weapon> old = c_weapon.removeItem(slot_position);
 		if (old)
-			e_invenotry.addItem(std::unique_ptr<Item>(old.release()));
-		recalcute_stats();
+			e_inventory.addItem(std::unique_ptr<Item>(old.release()));
+		recalculate_stats();
 		return true;
 	}
 
+	// Oprema predmet s zadanog mjesta u ruksaku. Predmet koji je vec bio u tom
+	// slotu vraca se u ruksak, pa u njemu mora biti slobodnog mjesta.
+	// Vraca false ako mjesto u ruksaku nije popunjeno ili predmet nije oprema.
 	bool Player_Character::equip(int backpack_position)
 	{
-		std::unique_ptr<Item> item = e_invenotry.removeItem(backpack_position);
+		std::unique_ptr<Item> item = e_inventory.removeItem(backpack_position);
 		if (!item) 
 			return false;
 		if (item->getType() == Item_Type::Armor)
@@ -82,7 +87,7 @@ namespace oop::projekt
 			std::unique_ptr<Armor> armor = c_armor.transferToArmor(std::move(item));
 			unequip_armor(static_cast<int>(armor->getArmorSlot())); 
 			c_armor.addItem(std::move(armor));
-			recalcute_stats();
+			recalculate_stats();
 			return true;
 		}
 		else if (item->getType() == Item_Type::Weapon) 
@@ -90,15 +95,56 @@ namespace oop::projekt
 			std::unique_ptr<Weapon> weapon = c_weapon.transferToWeapon(std::move(item));
 			unequip_weapon(static_cast<int>(weapon->getWeaponSlot()));
 			c_weapon.addItem(std::move(weapon));
-			recalcute_stats();
+			recalculate_stats();
 			return true;
 		}
 
-		e_invenotry.addItem(move(item));
+		e_inventory.addItem(move(item));
 		return false;
 	}
 
-	std::string Player_Character::showstats() const
+	// Stavlja predmet u ruksak. Za razliku od addItem, koji samo vraca false,
+	// ovdje se baca iznimka jer pozivatelj (uzimanje plijena) mora razlikovati
+	// pun ruksak od neispravnog predmeta.
+	//
+	// Predmet se prima po referenci, a ne po vrijednosti. Kad bi se primao po
+	// vrijednosti, vlasnistvo bi se prenijelo vec pri pozivu, pa bi se predmet
+	// unistio zajedno s parametrom kad se baci iznimka. Ovako on ostaje kod
+	// pozivatelja, koji ga moze vratiti protivniku.
+	void Player_Character::takeItem(std::unique_ptr<Item>& item)
+	{
+		if (!item)
+			return;
+		if (e_inventory.isFull())
+			throw InventoryFullException(item->getName());
+		e_inventory.addItem(std::move(item));
+	}
+
+	// Vraca bodove zivota, ali nikad iznad maksimuma.
+	void Player_Character::heal(float heal_amount)
+	{
+		if (heal_amount <= 0)
+			return;
+		hp = hp + heal_amount;
+		if (hp > max_hp)
+			hp = max_hp;
+	}
+
+	// std::to_string kod float vrijednosti uvijek ispisuje sest decimala, pa se
+	// cijeli brojevi ispisuju bez njih, a brzina zaokruzuje na dvije.
+	static std::string formatStat(float value)
+	{
+		if (value == static_cast<int>(value))
+			return std::to_string(static_cast<int>(value));
+
+		std::string text = std::to_string(value);
+		size_t dot = text.find('.');
+		if (dot != std::string::npos && text.size() > dot + 3)
+			text = text.substr(0, dot + 3);
+		return text;
+	}
+
+	std::string Player_Character::showStats() const
 	{
 		std::string out;
 		float armor_def = c_armor.total_armor_defense();
@@ -108,10 +154,9 @@ namespace oop::projekt
 		float weapon_spd = c_weapon.total_weapon_speed();
 
 		return "Name: " + name + "\n" +
-			"Level: " + std::to_string(LVL) + "\n" +
-			"HP: " + std::to_string(hp) + " / " + std::to_string(max_hp) + "\n" +
-			"Attack: " + std::to_string(base_attack) + " (+" + std::to_string(weapon_atk) + " weapon) = " + std::to_string(total_attack) + "\n" +
-			"Defense: " + std::to_string(base_defense) + " (+" + std::to_string(armor_def + weapon_def) + " oprema) = " + std::to_string(total_defense) + "\n" +
-			"Speed: " + std::to_string(base_speed) + " (+" + std::to_string(armor_spd + weapon_spd) + " oprema) = " + std::to_string(total_speed) + "\n";
+			"HP: " + formatStat(hp) + " / " + formatStat(max_hp) + "\n" +
+			"Attack: " + formatStat(base_attack) + " (+" + formatStat(weapon_atk) + " weapon) = " + formatStat(total_attack) + "\n" +
+			"Defense: " + formatStat(base_defense) + " (+" + formatStat(armor_def + weapon_def) + " gear) = " + formatStat(total_defense) + "\n" +
+			"Speed: " + formatStat(base_speed) + " (+" + formatStat(armor_spd + weapon_spd) + " gear) = " + formatStat(total_speed) + "\n";
 	}
 };
