@@ -1,4 +1,6 @@
 #include "Item.h"
+#include <sstream>
+#include <iomanip>
 
 namespace oop::projekt
 {
@@ -26,9 +28,11 @@ namespace oop::projekt
 
     std::string Item::seeStats() const
     {
-        return "item name: " + item_name + "\n" +
-            "item type: " + toString(item_type) + "\n"
-            "item rarity: " + toString(rarity) + "\n";
+        std::ostringstream out;
+        out << "item name: " << item_name << "\n"
+            << "item type: " << toString(item_type) << "\n"
+            << "item rarity: " << toString(rarity) << "\n";
+        return out.str();
     }
 
     Armor Armor::fromLine(const std::string& line)
@@ -67,12 +71,15 @@ namespace oop::projekt
 
     std::string Armor::seeStats() const
     {
-        return "item name: " + item_name + "\n" +
-            "item type: " + toString(item_type) + "\n" +
-            "armor defense: " + std::to_string(armor_defense) + "\n" +
-            "armor speed: " + std::to_string(armor_speed) + "\n" +
-            "armor type: " + toString(armor_type) + "\n"
-            "item rarity: " + toString(rarity) + "\n";
+        std::ostringstream out;
+        out << std::fixed << std::setprecision(2);
+        out << "item name: " << item_name << "\n"
+            << "item type: " << toString(item_type) << "\n"
+            << "armor defense: " << armor_defense << "\n"
+            << "armor speed: " << armor_speed << "\n"
+            << "armor type: " << toString(armor_type) << "\n"
+            << "item rarity: " << toString(rarity) << "\n";
+        return out.str();
     }
 
     Weapon Weapon::fromLine(const std::string& line)
@@ -114,13 +121,16 @@ namespace oop::projekt
 
     std::string Weapon::seeStats() const
     {
-        return "item name: " + item_name + "\n" +
-            "item type: " + toString(item_type) + "\n" +
-            "weapon attack: " + std::to_string(weapon_attack) + "\n" +
-            "weapon defense: " + std::to_string(weapon_defense) + "\n" +
-            "weapon speed: " + std::to_string(weapon_speed) + "\n" +
-            "hand: " + toString(weapon_slot) + "\n"
-            "item rarity: " + toString(rarity) + "\n";
+        std::ostringstream out;
+        out << std::fixed << std::setprecision(2);
+        out << "item name: " << item_name << "\n"
+            << "item type: " << toString(item_type) << "\n"
+            << "weapon attack: " << weapon_attack << "\n"
+            << "weapon defense: " << weapon_defense << "\n"
+            << "weapon speed: " << weapon_speed << "\n"
+            << "hand: " << toString(weapon_slot) << "\n"
+            << "item rarity: " << toString(rarity) << "\n";
+        return out.str();
     }
 
 }

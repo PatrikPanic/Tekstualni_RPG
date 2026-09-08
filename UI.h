@@ -6,7 +6,7 @@
 #include "Map.h"
 #include "Player_Character.h"
 #include "Location.h"
-#include "EnemyFactory.h"
+#include "Enemyfactory.h"
 #include "Score.h"
 
 namespace oop::projekt
@@ -36,7 +36,19 @@ namespace oop::projekt
 		void showIntro(std::string player_name);
 		void showHighscore(Highscore& highscore);
 		void showGameOver(bool won, int raw_score, int days, int final_score);
-		int gameMenu(Map& map, Player_Character& player, Score& score, bool can_rest);
+		// Stavke izbornika igre. Vraca se oznaka odabrane radnje, a ne redni
+		// broj, jer se "Rest" nudi samo u gradovima pa se redni brojevi
+		// mijenjaju ovisno o lokaciji.
+		enum class Game_choice
+		{
+			Travel,
+			Inventory,
+			Stats,
+			Attack,
+			Rest,
+			Back
+		};
+		Game_choice gameMenu(Map& map, Player_Character& player, Score& score, bool can_rest);
 		template <typename T> int showInventory(T& inventory)
 		{
 			return showOptions(inventory.getItemNames());
@@ -51,7 +63,7 @@ namespace oop::projekt
 		void showRunResult(bool success);
 		std::string drawMap(Location* current);
 		int showMapMenu(Map &mapa);
-		int showInventory(Player_Character& player);
+		int showInventory();
 		int backpack_inventory(Player_Character& player);
 		int armor_inventory(Player_Character& player);
 		int weapon_inventory(Player_Character& player);

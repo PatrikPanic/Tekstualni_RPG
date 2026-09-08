@@ -1,15 +1,14 @@
-﻿#include "EnemyFactory.h"
+﻿#include "Enemyfactory.h"
 
 namespace oop::projekt
 {
 	// Vraca nasumicno ime iz zadanog popisa. Ako je popis prazan (npr. datoteka
 	// s imenima nije pronadena), vraca zamjensko ime umjesto dijeljenja s nulom.
-	std::string EnemyFactory::pickRandomName(const std::map<int, std::string>& names) const
+	std::string EnemyFactory::pickRandomName(const std::vector<std::string>& names) const
 	{
 		if (names.empty())
 			return "Unknown Enemy";
-		int random = rand() % static_cast<int>(names.size());
-		return names.at(random);
+		return names[Random::next(0, static_cast<int>(names.size()) - 1)];
 	}
 
 	// Stvara obicnog protivnika. Razina raste s tezinom lokacije, a iz nje se
@@ -17,7 +16,7 @@ namespace oop::projekt
 	// ali i vrjedniji.
 	Enemy EnemyFactory::createEnemy(Location* location)
 	{
-		int lvl = 1 + Location::toInt(location->getlocationdifficulty()) * 4 + (rand() % 4);
+		int lvl = 1 + Location::toInt(location->getlocationdifficulty()) * 4 + Random::next(0, 3);
 		int max_hp = 50 + lvl * 14;
 		float base_attack = 14 + lvl * 4.0;
 		float base_defense = 3 + lvl * 1.4;
@@ -107,10 +106,10 @@ namespace oop::projekt
 		int roll_rarity,roll_store;
 		for (int i = 0; i < num_items; i++)
 		{
-			roll_rarity = rand() % static_cast<int>(total);
+			roll_rarity = Random::next(0, static_cast<int>(total) - 1);
 			if (roll_rarity < common_weight)
 			{
-				roll_store = rand() % 3;
+				roll_store = Random::next(0, 2);
 				std::unique_ptr <Item> item;
 				switch (roll_store)
 				{
@@ -147,7 +146,7 @@ namespace oop::projekt
 				roll_rarity -= common_weight;
 				if (roll_rarity < rear_weight)
 				{
-					roll_store = rand() % 2;
+					roll_store = Random::next(0, 1);
 					std::unique_ptr <Item> item;
 					switch (roll_store)
 					{
@@ -175,7 +174,7 @@ namespace oop::projekt
 					roll_rarity -= rear_weight;
 					if (roll_rarity < epic_weight)
 					{
-						roll_store = rand() % 2;
+						roll_store = Random::next(0, 1);
 						std::unique_ptr <Item> item;
 						switch (roll_store)
 						{
@@ -201,7 +200,7 @@ namespace oop::projekt
 					}
 					else
 					{
-						roll_store = rand() % 2;
+						roll_store = Random::next(0, 1);
 						std::unique_ptr <Item> item;
 						switch (roll_store)
 						{
@@ -238,7 +237,6 @@ namespace oop::projekt
 			throw FileNotFoundException("Enemy");
 		{
 			std::string line;
-			int cityid = 0,forestid = 0,caveid = 0,roadid = 0;
 			Location::LocationType typeoflocation;
 			getline(file, line);
 			while (getline(file, line))
@@ -251,29 +249,25 @@ namespace oop::projekt
 				case(Location::LocationType::City):
 				{
 					getline(ss, line);
-					city.emplace(cityid, line);
-					cityid += 1;
+					city.push_back(line);
 					break;
 				}
 				case(Location::LocationType::Forest):
 				{
 					getline(ss, line);
-					forest.emplace(forestid, line);
-					forestid += 1;
+					forest.push_back(line);
 					break;
 				}
 				case(Location::LocationType::Road):
 				{
 					getline(ss, line);
-					road.emplace(roadid, line);
-					roadid += 1;
+					road.push_back(line);
 					break;
 				}
 				case(Location::LocationType::Cave):
 				{
 					getline(ss, line);
-					cave.emplace(caveid, line);
-					caveid += 1;
+					cave.push_back(line);
 					break;
 				}
 				default:

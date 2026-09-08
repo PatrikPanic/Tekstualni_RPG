@@ -244,5 +244,25 @@ namespace Tests
 			Assert::IsTrue(ispis.find("Iron Helmet") != std::string::npos);
 			Assert::IsTrue(ispis.find("Boots") != std::string::npos);
 		}
+
+		// Zauzeto mjesto se ne smije prepisati, jer bi se stari predmet tiho
+		// izgubio. Pozivatelj ga mora prvo skinuti.
+		TEST_METHOD(Oklop_ne_prepisuje_zauzeto_mjesto)
+		{
+			Armor_Inventory oklopi;
+			Assert::IsTrue(oklopi.addItem(armor("Kaciga", 5, 0.02f, ArmorSlot::Helmet)));
+
+			Assert::IsFalse(oklopi.addItem(armor("Bolja kaciga", 9, 0.03f, ArmorSlot::Helmet)));
+			Assert::AreEqual(std::string("Kaciga"), oklopi.item_from_inventory(0)->getName());
+		}
+
+		TEST_METHOD(Oruzje_ne_prepisuje_zauzetu_ruku)
+		{
+			Weapon_Inventory oruzja;
+			Assert::IsTrue(oruzja.addItem(weapon("Mac", 14, 1, 0.06f, WeaponSlot::Right_hand)));
+
+			Assert::IsFalse(oruzja.addItem(weapon("Sjekira", 20, 0, 0.03f, WeaponSlot::Right_hand)));
+			Assert::AreEqual(std::string("Mac"), oruzja.item_from_inventory(1)->getName());
+		}
 	};
 }

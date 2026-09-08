@@ -1,11 +1,11 @@
 #include "Map.h"
+#include <algorithm>
 
 namespace oop::projekt
 {
 	Map::Map()
 	{
         // kreiranje lokacija
-        locations.reserve(15);
         locations.push_back(Location("Ironhold", Location::LocationType::City, Location::Difficulty::Easy));
         locations.push_back(Location("Stonehaven", Location::LocationType::City, Location::Difficulty::Medium));
         locations.push_back(Location("Duskport", Location::LocationType::City, Location::Difficulty::Easy));
@@ -67,11 +67,7 @@ namespace oop::projekt
 
 	bool Map::isMidbossLocation(Location* location) const
 	{
-		for (int i = 0; i < static_cast<int>(midboss_locations.size()); i++)
-		{
-			if (midboss_locations[i] == location)
-				return true;
-		}
-		return false;
+		return std::find(midboss_locations.begin(), midboss_locations.end(),
+			location) != midboss_locations.end();
 	}
 }

@@ -5,6 +5,7 @@
 #include <random>
 #include <fstream>
 #include <map>
+#include <vector>
 #include <sstream>
 #include <memory>
 
@@ -25,12 +26,14 @@ namespace oop::projekt
 	class EnemyFactory
 	{
 	private:
-		std::map<int, std::string> city;
-		std::map<int, std::string> forest;
-		std::map<int, std::string> road;
-		std::map<int, std::string> cave;
+		// Imena su razvrstana po tipu lokacije. Vektor je ovdje prirodniji od
+		// mape, jer se imenima pristupa iskljucivo po nasumicnom rednom broju.
+		std::vector<std::string> city;
+		std::vector<std::string> forest;
+		std::vector<std::string> road;
+		std::vector<std::string> cave;
 
-		std::string pickRandomName(const std::map<int, std::string>& names) const;
+		std::string pickRandomName(const std::vector<std::string>& names) const;
 	public:
 		Enemy createEnemy(Location* location);
 		Enemy createBoss();

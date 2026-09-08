@@ -1,4 +1,5 @@
 #include "Game.h"
+#include <algorithm>
 #include <iostream>
 #include <string>
 
@@ -64,7 +65,7 @@ namespace oop::projekt
 	{
 		int choice = ui.showMapMenu(map);
 		std::vector<Location*> available = map.getAvailableLocations();
-		if (available.size() > choice)
+		if (choice >= 0 && choice < static_cast<int>(available.size()))
 		{
 			Location* destination = available[choice];
 
@@ -94,7 +95,7 @@ namespace oop::projekt
 			}
 
 			int chance = 20 + Location::toInt(map.getCurrentLocation()->getlocationdifficulty()) * 15;
-			if (rand() % 100 < chance)
+			if (Random::next(0, 99) < chance)
 			{
 				startEncounter();
 			}
@@ -108,7 +109,7 @@ namespace oop::projekt
 
 		while (inventory)
 		{
-			switch (ui.showInventory(player))
+			switch (ui.showInventory())
 			{
 			case(0):
 			{
@@ -257,24 +258,19 @@ namespace oop::projekt
 
 	bool Game::isMidbossDefeated(std::string location_name)
 	{
-		for (int i = 0; i < static_cast<int>(defeated_midbosses.size()); i++)
-		{
-			if (defeated_midbosses[i] == location_name)
-				return true;
-		}
-		return false;
+		return std::find(defeated_midbosses.begin(), defeated_midbosses.end(),
+			location_name) != defeated_midbosses.end();
 	}
 
 	// U Voidspire se moze uci tek kad su oba srednja bossa porazena.
 	bool Game::canEnterFinalLocation()
 	{
 		std::vector<Location*> midbosses = map.getMidbossLocations();
-		for (int i = 0; i < static_cast<int>(midbosses.size()); i++)
-		{
-			if (!isMidbossDefeated(midbosses[i]->getLocationName()))
-				return false;
-		}
-		return true;
+		return std::all_of(midbosses.begin(), midbosses.end(),
+			[this](Location* lokacija)
+			{
+				return isMidbossDefeated(lokacija->getLocationName());
+			});
 	}
 
 	// Srednji boss cuva prolaz. Pojavljuje se samo prvi put na toj lokaciji.
@@ -403,40 +399,38 @@ namespace oop::projekt
 				menu = true;
 				while (menu)
 				{
-					// "Rest" se nudi samo u gradovima, pa se ostale stavke pomicu
+					// "Rest" se nudi samo u gradovima. Izbornik vraca oznaku
+					// radnje, pa redni brojevi stavki nisu bitni.
 					bool can_rest = (map.getCurrentLocation()->getLocationType() == Location::LocationType::City);
-					int choice = ui.gameMenu(map, player, score, can_rest);
-					if (!can_rest && choice >= 4)
-						choice += 1;
 
-					switch (choice)
+					switch (ui.gameMenu(map, player, score, can_rest))
 					{
-					case(0):
+					case(UI::Game_choice::Travel):
 					{
 						mapTravel();
 						break;
 					}
-					case(1):
+					case(UI::Game_choice::Inventory):
 					{
 						inventory_control();
 						break;
 					}
-					case(2):
+					case(UI::Game_choice::Stats):
 					{
 						ui.showMessage(player.showStats());
 						break;
 					}
-					case(3):
+					case(UI::Game_choice::Attack):
 					{
 						startEncounter();
 						break;
 					}
-					case(4):
+					case(UI::Game_choice::Rest):
 					{
 						restInCity();
 						break;
 					}
-					case(5):
+					case(UI::Game_choice::Back):
 					{
 						menu = false;
 						break;

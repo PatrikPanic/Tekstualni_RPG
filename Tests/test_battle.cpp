@@ -1,6 +1,7 @@
 #include "CppUnitTest.h"
 
 #include "BattleEngine.h"
+#include "Random.h"
 
 #include <cstdlib>
 
@@ -173,7 +174,7 @@ namespace Tests
 			Enemy protivnik("Protivnik", 1, 50, 10, 0, 0.5, 2);
 			Battle borba(&igrac, &protivnik);
 
-			srand(12345);
+			Random::seed(12345);
 			bool uspjeh = false;
 			bool neuspjeh = false;
 			for (int i = 0; i < 300; i++)

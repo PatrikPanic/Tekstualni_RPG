@@ -38,7 +38,10 @@ namespace oop::projekt
 	// nakon svake promjene opreme ponovno racunaju u recalculate_stats.
 	class Player_Character : public Entity
 	{
-	public:
+	private:
+		// Ukupne vrijednosti, izracunate iz osnovnih i bonusa opreme.
+		// Dostupne su samo preko gettera, kako se ne bi mogle promijeniti
+		// mimo recalculate_stats.
 		float total_attack;
 		float total_defense;
 		float total_speed;
@@ -81,7 +84,7 @@ namespace oop::projekt
 			this->LVL = LVL;
 		}
 		int getLVL() const { return LVL; }
-		float deal_dmg() const { return base_attack; }
+		float deal_dmg() const override { return base_attack; }
 	};
 
 

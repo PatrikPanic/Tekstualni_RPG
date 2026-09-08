@@ -3,6 +3,7 @@
 #include <string>
 #include <cstdlib>
 #include "Player_Character.h"
+#include "Random.h"
 
 namespace oop::projekt
 {
@@ -26,8 +27,9 @@ namespace oop::projekt
 			Enemy
 		};
 
-		Battle(Player_Character* player, Enemy* enemy) { player_turnmetar = 0, enemy_turnmetar = 0,
-			this->player = player, this->enemy = enemy; }
+		Battle(Player_Character* player, Enemy* enemy)
+			: player_turnmetar(0), enemy_turnmetar(0), player(player), enemy(enemy) {
+		}
 		TurnOwner processTick();
 		float performAttack(TurnOwner vlasnik);
 		void performDefense();

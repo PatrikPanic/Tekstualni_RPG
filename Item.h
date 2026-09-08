@@ -7,6 +7,7 @@
 #include <map>
 #include <memory>
 #include "Exception.h"
+#include "Random.h"
 
 namespace oop::projekt
 {	
@@ -131,7 +132,7 @@ namespace oop::projekt
 		{
 			if (byrarity[rarity].empty())
 				return -1;
-			int idx = rand() % byrarity[rarity].size();
+			int idx = Random::next(0, static_cast<int>(byrarity[rarity].size()) - 1);
 			return byrarity[rarity][idx];
 		}
 		// Vraca novu kopiju predloska sa zadanom oznakom, ili nullptr ako
@@ -159,7 +160,7 @@ namespace oop::projekt
 	// Item - osnovni predmet u igri. Cuva naziv, vrstu, rijetkost i oznaku.
 	// Iz njega se izvode Armor i Weapon, pa destruktor mora biti virtualan
 	// kako bi se izvedeni predmeti ispravno unistili preko pokazivaca na Item.
-	class Item : public ItemTemplateStore<Item>
+	class Item
 	{
 	protected:
 		std::string item_name;
@@ -219,7 +220,7 @@ namespace oop::projekt
 	
 	// Armor - dio oklopa. Uz podatke iz Item klase nosi obranu, bonus brzine
 	// i mjesto na kojem se nosi.
-	class Armor :public Item, public ItemTemplateStore<Armor>
+	class Armor : public Item
 	{
 	private:
 		int armor_defense;
@@ -267,7 +268,7 @@ namespace oop::projekt
 
 	// Weapon - oruzje. Osim napada moze davati i obranu, pa se stitovi
 	// prikazuju kao oruzje u lijevoj ruci.
-	class Weapon : public Item, public ItemTemplateStore<Weapon>
+	class Weapon : public Item
 	{
 	private:
 		int weapon_defense;

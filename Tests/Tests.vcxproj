@@ -167,6 +167,7 @@
     <ClCompile Include="..\Location.cpp" />
     <ClCompile Include="..\Map.cpp" />
     <ClCompile Include="..\Player_Character.cpp" />
+    <ClCompile Include="..\Random.cpp" />
     <ClCompile Include="..\Score.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>

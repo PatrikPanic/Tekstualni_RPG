@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <deque>
 #include <map>
 #include "Location.h"
 
@@ -11,13 +12,14 @@ namespace oop::projekt
 	// bridovi. Veze su dvosmjerne i cuvaju se kao popis susjeda za svaku
 	// lokaciju, pa se igracu nude samo lokacije dostupne iz trenutne.
 	//
-	// Vazno: connections cuva pokazivace na elemente vektora locations, pa se
-	// vektoru unaprijed rezervira mjesto. Kad bi tijekom punjenja narastao,
-	// svi bi dotad spremljeni pokazivaci postali neispravni.
+	// Vazno: connections cuva pokazivace na elemente spremnika locations.
+	// Zato je koristen deque, a ne vector - deque pri dodavanju na kraj ne
+	// premjesta postojece elemente, pa pokazivaci ostaju valjani bez obzira
+	// na broj lokacija. Kod vectora bi se morala pamtiti tocna rezervacija.
 	class Map
 	{
 	private:
-		std::vector<Location> locations;
+		std::deque<Location> locations;
 		Location* current_location;
 		Location* start_location;
 		Location* final_location;

@@ -28,7 +28,7 @@ namespace oop::projekt
 	// Vraca nullptr ako je mjesto prazno ili izvan granica.
 	std::unique_ptr <Item> Backpack_Inventory::removeItem(int position)
 	{
-		if (position >= slots.size())
+		if (position < 0 || position >= static_cast<int>(slots.size()))
 		{
 			return nullptr;
 		}
@@ -44,41 +44,31 @@ namespace oop::projekt
 
 	int Backpack_Inventory::inventory_size() const
 	{
-		int size = 0;
-		for (int i = 0; i < slots.size(); i++)
-		{
-			if (slots[i])
-				size++;
-		}
-		return size;
+		return static_cast<int>(std::count_if(slots.begin(), slots.end(),
+			[](const std::unique_ptr<Item>& predmet) { return predmet != nullptr; }));
 	}
 
 	// Funkcije spremnika oklopa
 	// Oklop se uvijek sprema na mjesto koje odgovara njegovom slotu. Ako je to
 	// mjesto vec zauzeto, stari se predmet gubi, pa ga pozivatelj mora prije
 	// skinuti preko unequip_armor.
+	// Oklop se sprema na mjesto koje odgovara njegovom slotu. Vrijednosti
+	// ArmorSlot odgovaraju indeksima u spremniku, pa pretvorba u broj daje
+	// trazeno mjesto. Zauzeto mjesto se ne prepisuje, jer bi se stari predmet
+	// tiho izgubio; pozivatelj ga mora prvo skinuti preko unequip_armor.
 	bool Armor_Inventory::addItem(std::unique_ptr <Armor> addingitem)
 	{
-		switch(addingitem->getArmorSlot())
-		{
-		case ArmorSlot::Helmet:
-			slots[0] = std::move(addingitem);
-			return true;
-		case ArmorSlot::Chest:
-			slots[1] = std::move(addingitem);
-			return true;
-		case ArmorSlot::Gloves:
-			slots[2] = std::move(addingitem);
-			return true;
-		case  ArmorSlot::Pants:
-			slots[3] = std::move(addingitem);
-			return true;
-		case ArmorSlot::Boots:
-			slots[4] = std::move(addingitem);
-			return true;
-		default:
+		if (!addingitem)
 			return false;
-		}
+
+		int slot = static_cast<int>(addingitem->getArmorSlot());
+		if (slot < 0 || slot >= static_cast<int>(slots.size()))
+			return false;
+		if (slots[slot])
+			return false;
+
+		slots[slot] = std::move(addingitem);
+		return true;
 	}
 
 	// Provjera vrste ide preko dynamic_cast, jer se tek u trenutku pretvorbe
@@ -99,39 +89,35 @@ namespace oop::projekt
 
 	float Armor_Inventory::total_armor_defense() const
 	{
-		float total_armor = 0;
-		for (auto& po_armor : slots)
-		{
-			if (po_armor)
+		return std::accumulate(slots.begin(), slots.end(), 0.0f,
+			[](float zbroj, const std::unique_ptr<Armor>& komad)
 			{
-				total_armor = total_armor + po_armor->getArmorDefense();
-			}
-		}
-		return total_armor;
+				return komad ? zbroj + komad->getArmorDefense() : zbroj;
+			});
 	}
+	// Bonus brzine je prosjek opremljenih dijelova, a ne zbroj, kako pet
+	// komada oklopa ne bi neuobicajeno ubrzalo igraca.
 	// Bonus brzine je prosjek opremljenih dijelova, a ne zbroj, kako pet
 	// komada oklopa ne bi neuobicajeno ubrzalo igraca.
 	float Armor_Inventory::total_armor_speed() const
 	{
-		float total_speed = 0;
-		int i = 0;
-		for (auto& po_armor : slots)
-		{
-			if (po_armor)
+		int opremljenih = static_cast<int>(std::count_if(slots.begin(), slots.end(),
+			[](const std::unique_ptr<Armor>& komad) { return komad != nullptr; }));
+		if (opremljenih == 0)
+			return 0.0f;
+
+		float zbroj = std::accumulate(slots.begin(), slots.end(), 0.0f,
+			[](float suma, const std::unique_ptr<Armor>& komad)
 			{
-				total_speed = total_speed + po_armor->getArmorSpeed();
-				i++;
-			}
-		}
-		if (i != 0)
-			return total_speed/i;
-		return 0;
+				return komad ? suma + komad->getArmorSpeed() : suma;
+			});
+		return zbroj / opremljenih;
 	}
 
 	std::vector<std::string> Armor_Inventory::getItemNames() const
 	{
 		std::vector<std::string> inventoryitemnames;
-		for (int i = 0; i < slots.size(); i++)
+		for (int i = 0; i < static_cast<int>(slots.size()); i++)
 		{
 			if (slots[i])
 				inventoryitemnames.push_back(slots[i]->getName());
@@ -158,19 +144,21 @@ namespace oop::projekt
 	}
 
 	// Funkcije spremnika oruzja
+	// Vrijedi isto sto i za oklop: mjesto je odredeno rukom u kojoj se oruzje
+	// drzi, a zauzeto mjesto se ne prepisuje.
 	bool Weapon_Inventory::addItem(std::unique_ptr <Weapon> addingitem)
 	{
-		switch (addingitem->getWeaponSlot())
-		{
-		case WeaponSlot::Left_hand:
-			slots[0] = std::move(addingitem);
-			return true;
-		case WeaponSlot::Right_hand:
-			slots[1] = std::move(addingitem);
-			return true;
-		default:
+		if (!addingitem)
 			return false;
-		}
+
+		int slot = static_cast<int>(addingitem->getWeaponSlot());
+		if (slot < 0 || slot >= static_cast<int>(slots.size()))
+			return false;
+		if (slots[slot])
+			return false;
+
+		slots[slot] = std::move(addingitem);
+		return true;
 	}
 
 	std::unique_ptr <Weapon> Weapon_Inventory::transferToWeapon(std::unique_ptr <Item> item)
@@ -187,52 +175,43 @@ namespace oop::projekt
 
 	float Weapon_Inventory::total_weapon_defense() const
 	{
-		float total_armor = 0;
-		for (auto& po_weapon : slots)
-		{
-			if (po_weapon)
+		return std::accumulate(slots.begin(), slots.end(), 0.0f,
+			[](float zbroj, const std::unique_ptr<Weapon>& oruzje)
 			{
-				total_armor = total_armor + po_weapon->getWeaponDefense();
-			}
-		}
-		return total_armor;
+				return oruzje ? zbroj + oruzje->getWeaponDefense() : zbroj;
+			});
 	}
 
+	// Kao i kod oklopa, brzina je prosjek opremljenih komada.
 	float Weapon_Inventory::total_weapon_speed() const
 	{
-		float total_speed = 0;
-		int i = 0;
-		for (auto& po_weapon : slots)
-		{
-			if (po_weapon)
+		int opremljenih = static_cast<int>(std::count_if(slots.begin(), slots.end(),
+			[](const std::unique_ptr<Weapon>& oruzje) { return oruzje != nullptr; }));
+		if (opremljenih == 0)
+			return 0.0f;
+
+		float zbroj = std::accumulate(slots.begin(), slots.end(), 0.0f,
+			[](float suma, const std::unique_ptr<Weapon>& oruzje)
 			{
-				total_speed = total_speed + po_weapon->getWeaponSpeed();
-				i++;
-			}
-		}
-		if (i != 0)
-			return total_speed / i;
-		return 0;
+				return oruzje ? suma + oruzje->getWeaponSpeed() : suma;
+			});
+		return zbroj / opremljenih;
 	}
 
 
 	float Weapon_Inventory::total_weapon_attack() const
 	{
-		float total_attack = 0;
-		for (auto& po_weapon : slots)
-		{
-			if (po_weapon)
+		return std::accumulate(slots.begin(), slots.end(), 0.0f,
+			[](float zbroj, const std::unique_ptr<Weapon>& oruzje)
 			{
-				total_attack = total_attack + po_weapon->getWeaponAttack();
-			}
-		}
-		return total_attack;
+				return oruzje ? zbroj + oruzje->getWeaponAttack() : zbroj;
+			});
 	}
 
 	std::vector<std::string> Weapon_Inventory::getItemNames() const
 	{
 		std::vector<std::string> inventoryitemnames;
-		for (int i = 0; i < slots.size(); i++)
+		for (int i = 0; i < static_cast<int>(slots.size()); i++)
 		{
 			if (slots[i])
 				inventoryitemnames.push_back(slots[i]->getName());

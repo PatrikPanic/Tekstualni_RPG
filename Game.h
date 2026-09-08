@@ -6,7 +6,7 @@
 #include "BattleEngine.h"
 #include "UI.h"
 #include "InventoryEngine.h"
-#include "EnemyFactory.h"
+#include "Enemyfactory.h"
 #include "Score.h"
 
 namespace oop::projekt

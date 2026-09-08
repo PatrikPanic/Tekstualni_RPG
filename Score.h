@@ -10,7 +10,6 @@
 
 namespace oop::projekt
 {
-	// Prati bodove osvojene tijekom jedne odigrane partije.
 	// Score - prati bodove i protekle dane jedne odigrane partije.
 	// Bodovi se dobivaju za pobjede, a dani se trose odmaranjem u gradu i
 	// umanjuju konacni rezultat, pa se odmor ne isplati bez potrebe.
@@ -20,9 +19,9 @@ namespace oop::projekt
 		int total_score;
 		int days;
 	public:
-		static const int boss_score = 500;
-		static const int midboss_score = 200;
-		static const int day_penalty = 25;
+		static constexpr int boss_score = 500;
+		static constexpr int midboss_score = 200;
+		static constexpr int day_penalty = 25;
 
 		Score() { total_score = 0; days = 1; }
 		void addEnemyScore(Enemy& enemy, Location* location);
@@ -37,7 +36,6 @@ namespace oop::projekt
 		void reset() { total_score = 0; days = 1; }
 	};
 
-	// Jedan zapis u listi najboljih rezultata.
 	// ScoreEntry - jedan zapis u listi najboljih rezultata.
 	class ScoreEntry
 	{
@@ -50,7 +48,6 @@ namespace oop::projekt
 		int getEntryScore() const { return entry_score; }
 	};
 
-	// Lista najboljih rezultata, trajno spremljena u tekstualnu datoteku.
 	// Highscore - lista najboljih rezultata, trajno spremljena u tekstualnu
 	// datoteku. Cuva se najboljih deset rezultata, sortiranih od najveceg.
 	// Ako datoteka ne postoji, lista je samo prazna - to nije greska, jer se
@@ -62,7 +59,7 @@ namespace oop::projekt
 		std::string file_path;
 		std::string cleanName(std::string name) const;
 	public:
-		static const int max_entries = 10;
+		static constexpr int max_entries = 10;
 
 		Highscore(std::string path = "highscore.txt") { file_path = path; loadFromFile(); }
 		void loadFromFile();

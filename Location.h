@@ -20,7 +20,7 @@ namespace oop::projekt
 			Road
 		};
 
-		inline std::string toString(LocationType type)
+		static std::string toString(LocationType type)
 		{
 			switch (type) {
 			case LocationType::City:
@@ -53,7 +53,7 @@ namespace oop::projekt
 			VeryHard
 		};
 
-		std::string toString(Difficulty diff)
+		static std::string toString(Difficulty diff)
 		{
 			switch (diff) {
 			case Difficulty::Easy:
@@ -93,9 +93,9 @@ namespace oop::projekt
 	public:
 		Location(std::string location_Name, LocationType location_Type, Difficulty locationadiff) :
 			location_Name(location_Name), location_Type(location_Type), locationdifficulty(locationadiff) {}
-		std::string getLocationName() { return location_Name; }
-		LocationType getLocationType() { return location_Type; }
-		Difficulty getlocationdifficulty() { return locationdifficulty; }
+		std::string getLocationName() const { return location_Name; }
+		LocationType getLocationType() const { return location_Type; }
+		Difficulty getlocationdifficulty() const { return locationdifficulty; }
 	};
 }
 

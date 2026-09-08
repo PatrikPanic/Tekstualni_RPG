@@ -6,7 +6,7 @@ namespace oop::projekt
     int UI::showOptions(std::vector<std::string> options, std::string header1, std::string header2)
     {
         int selected = 0;
-        int size = options.size();
+        int size = static_cast<int>(options.size());
 
         while (true)
         {
@@ -164,7 +164,7 @@ namespace oop::projekt
         _getch();
     }
 
-    int UI::gameMenu(Map& map, Player_Character& player, Score& score, bool can_rest)
+    UI::Game_choice UI::gameMenu(Map& map, Player_Character& player, Score& score, bool can_rest)
     {
         std::string header = "  Day: " + std::to_string(score.getDays()) +
             "     HP: " + std::to_string((int)player.gethp()) + " / " + std::to_string((int)player.getMaxHp()) +
@@ -172,12 +172,24 @@ namespace oop::projekt
             "  (-" + std::to_string(score.getDayPenalty()) + " for days)\n\n";
         header += drawMap(map.getCurrentLocation());
 
+        // Popis stavki i popis pripadnih radnji grade se zajedno, pa odabrani
+        // redni broj uvijek pokazuje na ispravnu radnju.
         std::vector<std::string> options = { "Travel", "Inventory", "Stats", "Attack" };
-        if (can_rest)
-            options.push_back("Rest (heals fully, costs 1 day)");
-        options.push_back("Back");
+        std::vector<Game_choice> actions = { Game_choice::Travel, Game_choice::Inventory,
+            Game_choice::Stats, Game_choice::Attack };
 
-        return showOptions(options, header);
+        if (can_rest)
+        {
+            options.push_back("Rest (heals fully, costs 1 day)");
+            actions.push_back(Game_choice::Rest);
+        }
+        options.push_back("Back");
+        actions.push_back(Game_choice::Back);
+
+        int selected = showOptions(options, header);
+        if (selected < 0 || selected >= static_cast<int>(actions.size()))
+            return Game_choice::Back;
+        return actions[selected];
     }
 
     int UI::showBattleMenu(Player_Character& player, Enemy& enemy)
@@ -293,7 +305,7 @@ namespace oop::projekt
         std::vector<Location*> available = map.getAvailableLocations();
         for (Location* location : available)
         {
-            options.push_back(location->getLocationName() + " (Difficulty: " + location->toString(location->getlocationdifficulty()) + ")");
+            options.push_back(location->getLocationName() + " (Difficulty: " + Location::toString(location->getlocationdifficulty()) + ")");
         }
         options.push_back("Back");
         return showOptions(options, drawMap(map.getCurrentLocation()));
@@ -329,7 +341,7 @@ namespace oop::projekt
         return showOptions(options, header1);
     }
 
-    int UI::showInventory(Player_Character& player)
+    int UI::showInventory()
     {
         std::vector<std::string> options{ "Backpack", "Armor", "Weapon", "Back" };
         return(showOptions(options));

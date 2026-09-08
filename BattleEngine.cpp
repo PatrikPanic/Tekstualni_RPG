@@ -1,5 +1,3 @@
-#pragma once
-
 #include <iostream>
 #include <string>
 #include "BattleEngine.h"
@@ -9,12 +7,19 @@ namespace oop::projekt
 	// Pomice brojace dok jedan od njih ne prijede prag i vraca vlasnika poteza.
 	// Brojac se pritom umanjuje za prag, a ne postavlja na nulu, kako se visak
 	// ne bi gubio i kako bi razlika u brzini ostala vidljiva kroz vise poteza.
+	//
+	// Brzina se prije zbrajanja ogranicava odozdo. Kad bi oba sudionika imala
+	// brzinu nula, brojaci nikad ne bi dosegli prag i petlja se ne bi zavrsila.
 	Battle::TurnOwner Battle::processTick()
 	{
+		const float min_speed = 0.01f;
+		float player_speed = player->getSpeed() > min_speed ? player->getSpeed() : min_speed;
+		float enemy_speed = enemy->getSpeed() > min_speed ? enemy->getSpeed() : min_speed;
+
 		while (true)
 		{
-			player_turnmetar += player->getSpeed();
-			enemy_turnmetar += enemy->getSpeed();
+			player_turnmetar += player_speed;
+			enemy_turnmetar += enemy_speed;
 			if (player_turnmetar >= 1 || enemy_turnmetar >= 1)
 			{
 				if (player_turnmetar < enemy_turnmetar)
@@ -69,7 +74,7 @@ namespace oop::projekt
 
 	bool Battle::performEscape()
 	{
-		return std::rand() % 2 == 0;
+		return Random::next(0, 1) == 0;
 	}
 
 	bool Battle::isBattleOver()

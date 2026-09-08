@@ -58,7 +58,7 @@ namespace oop::projekt
 			return false;
 		std::unique_ptr<Armor> old = c_armor.removeItem(slot_position);
 		if (old)
-			e_inventory.addItem(std::unique_ptr<Item>(old.release())); // natrag u backpack
+			e_inventory.addItem(std::move(old)); // natrag u backpack
 		recalculate_stats();
 		return true;
 	}
@@ -69,7 +69,7 @@ namespace oop::projekt
 			return false;
 		std::unique_ptr<Weapon> old = c_weapon.removeItem(slot_position);
 		if (old)
-			e_inventory.addItem(std::unique_ptr<Item>(old.release()));
+			e_inventory.addItem(std::move(old));
 		recalculate_stats();
 		return true;
 	}
@@ -77,15 +77,27 @@ namespace oop::projekt
 	// Oprema predmet s zadanog mjesta u ruksaku. Predmet koji je vec bio u tom
 	// slotu vraca se u ruksak, pa u njemu mora biti slobodnog mjesta.
 	// Vraca false ako mjesto u ruksaku nije popunjeno ili predmet nije oprema.
+	// Oprema predmet s zadanog mjesta u ruksaku. Predmet koji je vec bio u tom
+	// slotu vraca se u ruksak, pa u njemu mora biti slobodnog mjesta.
+	// Ako skidanje ne uspije, novi predmet se vraca u ruksak umjesto da se
+	// izgubi, a metoda vraca false.
 	bool Player_Character::equip(int backpack_position)
 	{
 		std::unique_ptr<Item> item = e_inventory.removeItem(backpack_position);
 		if (!item) 
 			return false;
+
 		if (item->getType() == Item_Type::Armor)
 		{
 			std::unique_ptr<Armor> armor = c_armor.transferToArmor(std::move(item));
-			unequip_armor(static_cast<int>(armor->getArmorSlot())); 
+			if (!armor)
+				return false;
+
+			if (!unequip_armor(static_cast<int>(armor->getArmorSlot())))
+			{
+				e_inventory.addItem(std::move(armor));
+				return false;
+			}
 			c_armor.addItem(std::move(armor));
 			recalculate_stats();
 			return true;
@@ -93,13 +105,20 @@ namespace oop::projekt
 		else if (item->getType() == Item_Type::Weapon) 
 		{
 			std::unique_ptr<Weapon> weapon = c_weapon.transferToWeapon(std::move(item));
-			unequip_weapon(static_cast<int>(weapon->getWeaponSlot()));
+			if (!weapon)
+				return false;
+
+			if (!unequip_weapon(static_cast<int>(weapon->getWeaponSlot())))
+			{
+				e_inventory.addItem(std::move(weapon));
+				return false;
+			}
 			c_weapon.addItem(std::move(weapon));
 			recalculate_stats();
 			return true;
 		}
 
-		e_inventory.addItem(move(item));
+		e_inventory.addItem(std::move(item));
 		return false;
 	}
 

@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <algorithm>
+#include <numeric>
 #include "Item.h"
 
 
@@ -25,7 +27,7 @@ namespace oop::projekt
 		// Dodaje predmet na prvo slobodno mjesto. Vraca false ako je spremnik pun.
 		virtual bool addItem(std::unique_ptr <T> addingitem)
 		{
-			for (int i = 0; i < slots.size(); i++)
+			for (int i = 0; i < static_cast<int>(slots.size()); i++)
 			{
 				if (!slots[i])
 				{
@@ -39,7 +41,7 @@ namespace oop::projekt
 		// Vadi predmet sa zadane pozicije i prepusta vlasnistvo pozivatelju.
 		virtual std::unique_ptr <T> removeItem(int position)
 		{
-			if (position >= slots.size())
+			if (position < 0 || position >= static_cast<int>(slots.size()))
 			{
 				return nullptr;
 			}
@@ -56,7 +58,7 @@ namespace oop::projekt
 		virtual std::vector<std::string> getItemNames() const
 		{
 			std::vector<std::string> inventoryitemnames;
-			for (int i = 0; i < slots.size(); i++)
+			for (int i = 0; i < static_cast<int>(slots.size()); i++)
 			{
 				if (slots[i])
 					inventoryitemnames.push_back(slots[i]->getName());
@@ -91,14 +93,10 @@ namespace oop::projekt
 			return inventoryitemnames;
 		}
 
-		bool isFull()
+		bool isFull() const
 		{
-			for (auto i = 0; i < slots.size(); i++)
-			{
-				if (!slots[i])
-					return false;
-			}
-			return true;
+			return std::none_of(slots.begin(), slots.end(),
+				[](const std::unique_ptr<T>& mjesto) { return mjesto == nullptr; });
 		}
 
 		Item* item_from_inventory(int position) const

@@ -164,6 +164,7 @@ Test projekt uključuje samo datoteke s logikom igre. `UI.cpp`, `Game.cpp`,
 | `Map.h/.cpp`                 | mapa svijeta kao graf lokacija                                   |
 | `EnemyFactory.h/.cpp`        | stvaranje protivnika, srednjih bossova i završnog bossa          |
 | `Score.h/.cpp`               | bodovanje, brojač dana i lista najboljih rezultata               |
+| `Random.h/.cpp`              | zajednički generator slučajnih brojeva                           |
 | `Exception.h`                | hijerarhija iznimaka koje igra prijavljuje                       |
 | `Game.h/.cpp`                | glavna petlja i povezivanje svih dijelova igre                   |
 | `UI.h/.cpp`                  | konzolno sučelje, izbornici i crtanje mape                       |

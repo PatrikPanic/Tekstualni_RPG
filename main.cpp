@@ -4,8 +4,6 @@
 using namespace oop::projekt;
 int main()
 {
-    srand(time(0));
-
     try
     {
         Game game;
